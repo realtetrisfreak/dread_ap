@@ -596,6 +596,13 @@ class FlashShiftUpgradeRequiresMainItem(DefaultOnToggle):
     display_name = "Flash Shift Upgrade Requires Main Item"
 
 
+class NoLogic(Toggle):
+    """TOGGLE ONLY WHEN USING PLANDOS!
+    Ignores all trick requirements. OFF by default."""
+    display_name = "No Logic (Toggle ON for Plandos, otherwise keep OFF)"
+    default = 0
+
+
 @dataclass
 class _DreadOptionsBase(PerGameCommonOptions):
     starting_area: StartingArea
@@ -643,6 +650,7 @@ class _DreadOptionsBase(PerGameCommonOptions):
     speed_booster_upgrade_count: SpeedBoosterUpgradeCount
     flash_shift_included_ammo: FlashShiftIncludedAmmo
     flash_shift_upgrade_requires_main_item: FlashShiftUpgradeRequiresMainItem
+    no_logic: NoLogic
 
 
 # Final options dataclass = the explicit base above + one generated field per

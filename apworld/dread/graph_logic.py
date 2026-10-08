@@ -177,6 +177,9 @@ def build_regions(world, dock_assignments: dict[str, str] | None = None,
 
     indirect: list = []
     for i, (csrc, cdst, ast) in enumerate(g["entrances"]):
+        if world.options.no_logic.value:
+            regions[csrc].connect(regions[cdst], f"e{i}")
+            continue
         resolved = _resolve_docks(ast, assign, dock_sides, wreq)
         rt = resolved.get("type")
         if rt == "impossible":
