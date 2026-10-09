@@ -177,7 +177,7 @@ def build_regions(world, dock_assignments: dict[str, str] | None = None,
 
     indirect: list = []
     for i, (csrc, cdst, ast) in enumerate(g["entrances"]):
-        if world.options.no_logic.value:
+        if world.no_logic:
             regions[csrc].connect(regions[cdst], f"e{i}")
             continue
         resolved = _resolve_docks(ast, assign, dock_sides, wreq)
@@ -316,7 +316,7 @@ def set_graph_rules(world) -> None:
         for ev_region, ent in getattr(world, "_graph_indirect", []):
             mw.register_indirect_condition(ev_region, ent)
 
-    if world.options.no_logic.value:
+    if world.no_logic:
         # no_logic: the YAML is assumed valid. Every item is filler, and AP's
         # beatability sweep only collects advancement items, so an item-based
         # goal (victory AST / Metroid DNA) can never be satisfied. Don't gate

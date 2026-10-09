@@ -221,13 +221,17 @@ class DreadWorld(World):
     item_name_to_id = item_name_to_id
     location_name_to_id = location_name_to_id
 
+    @property
+    def no_logic(self) -> bool:
+        return bool(self.options.no_logic.value)
+
     web = DreadWebWorld()
 
     required_client_version = (0, 5, 0)
 
     def create_item(self, name: str,
                     classification: ItemClassification | None = None) -> Item:
-        if self.options.no_logic.value:
+        if self.no_logic:
             classification = ItemClassification.filler
         elif classification is None:
             classification = get_item_classification(name)
@@ -293,7 +297,7 @@ class DreadWorld(World):
             self._transport_matching = roll_connected_matching(
                 graph, self.random, tl, mode="randomized",
                 door_lock_rando=door_on,
-                no_logic=bool(self.options.no_logic.value))
+                no_logic=self.no_logic)
         tm = self._transport_matching
 
         # Spawn point + the minimal extra starting kit that bootstraps it.
@@ -303,7 +307,7 @@ class DreadWorld(World):
             if chosen is not None:
                 _key, self._start_comp, self._start_patcher = chosen
 
-                if self.options.no_logic.value:
+                if self.no_logic:
                     self._start_extra_items = []
                 else:
                     self._start_extra_items = minimal_start_items(
@@ -330,7 +334,7 @@ class DreadWorld(World):
                 ammo_amounts=ammo_amounts_from_options(self.options),
                 doors_to_change=set(self.options.doors_to_change.value),
                 change_doors_to=set(self.options.change_doors_to.value),
-                no_logic=bool(self.options.no_logic.value))
+                no_logic=self.no_logic)
 
     def _compute_dropped_locations(self) -> set[str]:
         """AP-names of pickup locations that are unreachable even with a FULL
@@ -356,7 +360,7 @@ class DreadWorld(World):
         Returns the empty set under ``minimal`` (unreachable spots stay as
         tracked filler, the Randovania-faithful behavior) and whenever the config
         leaves nothing stranded (the default Beginner config)."""
-        if self.options.no_logic.value:
+        if self.no_logic:
             return set()
         acc = self.options.accessibility
         if acc.value == acc.option_minimal:
@@ -428,7 +432,7 @@ class DreadWorld(World):
         # Power bombs: PB gates need >= MAX_BINDING_PB_CAP. The only PB capacity
         # sources are the launcher's starting_power_bombs and PB Tanks; if neither
         # can contribute, the gates are unreachable.
-        if not o.no_logic.value:
+        if not self.no_logic:
             if (int(o.starting_power_bombs.value) < MAX_BINDING_PB_CAP
                     and (int(o.power_bomb_tank_count.value) == 0
                         or int(o.power_bomb_tank_ammo.value) == 0)):
@@ -1257,6 +1261,8 @@ class DreadWorld(World):
             "enable_room_name_display": o.room_name_display.current_key.upper(),
             "raven_beak_damage_table_handling": o.raven_beak_damage_table.current_key,
             "nerf_power_bombs": bool(o.nerf_power_bombs.value),
+            "remove_tutorial_popups": bool(o.remove_tutorial_popups.value),
+            "remove_burenia_bots_vignette": bool(o.remove_burenia_bots_vignette.value),
             # Release the X from Elun at game start. Logic-safe to toggle (the
             # compiled rules assume the release must be triggered, so ON only
             # relaxes X-gated encounters). Routed to game_patches.default_x_released.
@@ -1272,7 +1278,7 @@ class DreadWorld(World):
             "starting_area": int(o.starting_area.value),
             "include_boss_pickups": bool(o.include_boss_pickups.value),
             # ADD: selects the vendored patcher in patcher_pipeline.patch()
-            "no_logic": bool(o.no_logic.value),
+            "no_logic": self.no_logic,
             # Client-only: drives whether DreadContext enables the DeathLink tag
             # and the death-detection poll. Not consumed by the patcher.
             "death_link": bool(o.death_link.value),
